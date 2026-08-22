@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# remind-app（仮称）
 
-## Getting Started
+板書のような**構造を持ったノート**を、文脈を保ったまま反復学習するためのWebアプリ。
 
-First, run the development server:
+現在は開発初期段階です。
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## なぜ作るのか
+
+既存の反復学習ツール（ReminDO、Anki など）は、1問1答形式を前提としています。
+そのため、複数の段階を踏む説明をカード化しようとすると、内容が分解されて論理の流れが失われます。
+
+例えば以下のようなノートは、既存ツールでは複数枚の独立したカードに分割されます。
+
+```
+・イオン結合: 〈金属〉元素と〈非金属〉元素の間にできる結合
+  ①どんな結合も〈不対電子〉の共有ではじまる
+  ②Naは電気陰性度が〈小さく〉、Clは〈大きい〉ため、電子対はCl側のものとなる
+  ③よって〈静電引力〉で結びつく
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+分割されると、①②③が「イオン結合がどう成立するか」を順に説明した一続きの論理であるという構造そのものが失われます。
+個々の空欄には答えられても、流れとしては頭に入りません。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+本アプリは、**1枚のノートの中に複数の空欄を持たせ、空欄ごとに正誤を記録しながら、
+スケジューリングはノート単位で行う**ことでこの問題を解決します。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+設計の出発点は、ReminDO を約7年間使用する中で蓄積した具体的な不満点です。
+詳細は [要件定義書](docs/要件定義書_v0.5.md) の 1.2 に記載しています。
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 主な設計判断
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| 判断 | 内容 |
+|---|---|
+| 表裏を二重管理しない | 正解を含むテキストのみを保存し、出題面は記法の置換で生成する |
+| 空欄は位置ではなく不変IDで管理 | 本文を加筆しても、空欄ごとの学習統計がずれないようにするため |
+| 統計はカウンタではなくログで保持 | 集計条件を後から変更でき、再分析が可能になるため |
+| SM-2は自作せず公開仕様を実装 | 検証不能な独自アルゴリズムの設計に時間を使わないため |
+| フロント・バックを分離しない | 想定利用者数と開発体制に対して、分離の利点が管理コストに見合わないため |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+各判断の背景・却下した選択肢・再検討条件は、要件定義書の付録A（ADR）に記載しています。
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 技術スタック
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- TypeScript / Next.js（App Router）/ React
+- PostgreSQL / Prisma
+- Docker Compose（ローカル開発環境）
+
+---
+
+## 動かし方
+
+### 必要なもの
+
+- Node.js 20 以上
+- Docker Desktop
+
+### 手順
+
+```bash
+git clone https://github.com/Hiroyuki-Komai/remind-app.git
+cd remind-app
+npm install
+
+# .env を作成し、以下を記載
+# DATABASE_URL="postgresql://remind:remind_local_pw@localhost:5432/remind?schema=public"
+
+docker compose up -d
+npx prisma migrate dev
+npm run dev
+```
+
+`http://localhost:3000` を開きます。
+
+環境構築で詰まりやすい箇所は [環境構築手順](docs/環境構築手順_v1.1.md) にまとめています。
+
+---
+
+## 現在の状態
+
+- [x] 開発環境の構築（Next.js + PostgreSQL + Prisma）
+- [ ] カード作成（`〈 〉` 記法のパース）
+- [ ] 空欄ごとの正誤記録
+- [ ] SM-2によるスケジューリング
+- [ ] カード間の遷移
+- [ ] Docker化 / CI / CD
+
+---
+
+## 既知の制約・未対応事項
+
+- 自動バックアップ未実装
+- レスポンス計測未実施
+- - 空欄ごとの正誤・日時は記録しているが、履歴を閲覧する画面は未実装（記録を先行させ、閲覧UIはv2で追加する）
+- 認証は単一ユーザーを想定した簡易実装
+- 画像・タグ・検索・LaTeX は対象外（要件定義書 3.2 参照）
+
+---
+
+## ドキュメント
+
+- [要件定義書](docs/要件定義書_v0.5.md)
+- [環境構築手順](docs/環境構築手順_v1.1.md)
