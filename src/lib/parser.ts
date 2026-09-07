@@ -2,15 +2,94 @@ export type Token = TextToken | BlankToken;
 
 export type TextToken = {
   kind: "text";
-  raw: string;    // 原文の該当区間（エスケープ('\')解除前） 例:\<x>
-  value: string;  // 表示用（エスケープ解除後）例:<x>
+  raw: string;    // 原文そのまま（エスケープ('\')解除前） 例:\<x>
+  value: string;  // 表示文字列（エスケープ解除後）例:<x>
 };
 
 export type BlankToken = {
   kind: "blank";
-  raw: string;     // 原文の該当区間。'〈' と '〉' を含む
-  answer: string;  // 表示用。区切り文字を除き、前後の空白をトリムし、エスケープ解除済み
+  raw: string;     // 原文そのまま'〈' と '〉' を含む
+  answer: string;  // 表示文字列。区切り文字を除き、前後の空白をトリムし、エスケープ解除済み
   index: number;   // 本文中で何番目の穴か（0始まり）
 };
 
-export function parse(body: string): Token[];
+export function parse(body: string): Token[] {
+  const tokens: Token[] = [];
+
+const OUTSIDE = 0;
+const INSIDE = 1;
+let state = OUTSIDE
+let open = -1;
+let textStart = 0;
+let buffer = '';
+let blankNum = 0;
+for (let i = 0; i < body.length; i++){
+    const c = body[ i ];
+    if(state === OUTSIDE){
+        switch (c) {
+            case "〈":
+              if(buffer !== ""){
+                tokens.push({
+                kind: "text",
+                raw: body.slice(textStart, i),
+                value: buffer,
+                });
+              }
+              open = i;
+              textStart = i;
+              buffer = '';
+              state = INSIDE;
+            break;
+
+            default:
+            buffer += c;
+            break;
+            }
+    }else if(state === INSIDE){
+        switch (c) {
+            case "〉":
+            if(buffer !== ""){
+                tokens.push({
+                    kind: "blank",
+                    raw: body.slice(open, i + 1 ),
+                    answer: buffer.trim(),
+                    index: blankNum,
+                });
+                buffer = "";
+                textStart =  i + 1;
+                blankNum++;
+                state = OUTSIDE;
+            }else{
+                //溜まったテキストが空
+                    buffer += c;
+                    state = OUTSIDE;
+            }
+        break;
+
+        default:
+        buffer += c;
+        break;
+        }
+    }
+}
+//EOFのとき
+    if(state === OUTSIDE){
+     //テキストを確定
+      const raw = body.slice(textStart);
+      if (raw !== "") {
+        tokens.push({
+        kind: "text",
+        raw: raw,
+        value: buffer,
+        });
+      }
+    }else{//state === INSIDE
+              tokens.push({
+            kind: "text",
+            raw: body.slice(open),
+            value: "〈" + buffer,
+        });
+    }
+return tokens
+
+};
