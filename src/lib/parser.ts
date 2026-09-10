@@ -70,6 +70,16 @@ for (let i = 0; i < body.length; i++){
             }
         break;
 
+        case "〈":
+          tokens.push({
+            kind: "text",
+            raw: body.slice(open, i),
+            value: "〈" + buffer,
+          });
+        buffer = '';
+        open = i;
+        break;
+
         case "\n":
           buffer = body.slice(open, i + 1);
           state = OUTSIDE

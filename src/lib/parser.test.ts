@@ -16,8 +16,12 @@ describe("parse() — §2.5 異常系とその解釈", () => {
     ["〈A", [text("〈A")]],
     ["〈 微分 〉", [blank("微分","〈 微分 〉",0)]],
     ["〈〉", [text("〈〉")]],
-    ["A〉B", [text(`A〉B`)]],
-    ["〈A\nB〉", [text(`〈A\nB〉`)]],
+    ["A〉B", [text("A〉B")]],
+    ["〈A\nB〉", [text("〈A\nB〉")]],//「<」を打ち忘れても、改行した時点で次の虫食いの入力を受け付ける。
+    ["〈A〈B〉", [text("〈A"),blank("B","〈B〉",0)]],
+    ["〈A〉〈B〉", [blank("A","〈A〉",0),blank("B","〈B〉",1)]],
+    //〈A〉〈B〉` | blank(`A`) + blank(`B`) 
+    //〈A〈B〉` | text(`〈A`) + blank(`B`)
     //`〈A\nB〉` | text(`〈A\nB〉`
   ] as const)("%s", (input, expected) => {
     expect(parse(input)).toEqual(expected);
