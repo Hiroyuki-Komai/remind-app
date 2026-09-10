@@ -30,9 +30,9 @@ for (let i = 0; i < body.length; i++){
             case "〈":
               if(buffer !== ""){
                 tokens.push({
-                kind: "text",
-                raw: body.slice(textStart, i),
-                value: buffer,
+                  kind: "text",
+                  raw: body.slice(textStart, i),
+                  value: buffer,
                 });
               }
               open = i;
@@ -40,7 +40,11 @@ for (let i = 0; i < body.length; i++){
               buffer = '';
               state = INSIDE;
             break;
-
+/*
+            case "〉":
+            buffer = '';
+            break;
+*/
             default:
             buffer += c;
             break;
@@ -64,6 +68,11 @@ for (let i = 0; i < body.length; i++){
                     buffer = body.slice(open, i + 1);
                     state = OUTSIDE;
             }
+        break;
+
+        case "\n":
+          buffer = body.slice(open, i + 1);
+          state = OUTSIDE
         break;
 
         default:

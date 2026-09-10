@@ -16,7 +16,9 @@ describe("parse() — §2.5 異常系とその解釈", () => {
     ["〈A", [text("〈A")]],
     ["〈 微分 〉", [blank("微分","〈 微分 〉",0)]],
     ["〈〉", [text("〈〉")]],
-
+    ["A〉B", [text(`A〉B`)]],
+    ["〈A\nB〉", [text(`〈A\nB〉`)]],
+    //`〈A\nB〉` | text(`〈A\nB〉`
   ] as const)("%s", (input, expected) => {
     expect(parse(input)).toEqual(expected);
   });
