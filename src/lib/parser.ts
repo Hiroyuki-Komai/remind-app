@@ -13,6 +13,8 @@ export type BlankToken = {
   index: number;   // 本文中で何番目の穴か（0始まり）
 };
 
+const ESCAPABLE = new Set(["〈", "〉", "《", "》", "\\"]);
+
 export function parse(body: string): Token[] {
   const tokens: Token[] = [];
 
@@ -27,6 +29,15 @@ for (let i = 0; i < body.length; i++){
     const c = body[ i ];
     if(state === OUTSIDE){
         switch (c) {
+            case "\\":
+              if(ESCAPABLE.has(body[ i + 1 ])){
+                buffer += body[ i + 1 ];
+                i++;//escapeする為（読み飛ばし）
+              }else{//body[ i + 1 ] === その他
+                buffer += c;
+              }
+            break;
+            
             case "〈":
               if(buffer !== ""){
                 tokens.push({
@@ -51,6 +62,15 @@ for (let i = 0; i < body.length; i++){
             }
     }else if(state === INSIDE){
         switch (c) {
+          case "\\":
+              if(ESCAPABLE.has(body[ i + 1 ])){
+                buffer += body[ i + 1 ];
+                i++;//escapeする為（読み飛ばし）
+              }else{//body[ i + 1 ] === その他
+                buffer += c;
+              }
+            break;
+
             case "〉":
             if(buffer !== ""){
                 tokens.push({
