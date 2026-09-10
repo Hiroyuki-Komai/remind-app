@@ -61,7 +61,7 @@ for (let i = 0; i < body.length; i++){
                 state = OUTSIDE;
             }else{
                 //溜まったテキストが空
-                    buffer += c;
+                    buffer = body.slice(open, i + 1);
                     state = OUTSIDE;
             }
         break;
@@ -69,6 +69,7 @@ for (let i = 0; i < body.length; i++){
         default:
         buffer += c;
         break;
+        
         }
     }
 }
