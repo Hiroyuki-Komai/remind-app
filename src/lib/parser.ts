@@ -51,11 +51,7 @@ for (let i = 0; i < body.length; i++){
               buffer = '';
               state = INSIDE;
             break;
-/*
-            case "〉":
-            buffer = '';
-            break;
-*/
+
             default:
             buffer += c;
             break;
@@ -72,7 +68,7 @@ for (let i = 0; i < body.length; i++){
             break;
 
             case "〉":
-            if(buffer !== ""){
+            if(buffer !== "" && blankNum < 200){
                 tokens.push({
                     kind: "blank",
                     raw: body.slice(open, i + 1 ),
@@ -83,6 +79,17 @@ for (let i = 0; i < body.length; i++){
                 textStart =  i + 1;
                 blankNum++;
                 state = OUTSIDE;
+                
+            }else if(buffer !== "" && blankNum >= 200){
+              tokens.push({
+                kind: "text",
+                raw: body.slice(open, i+1),
+                value: "〈" + buffer + "〉",
+              });
+              buffer = "";
+              textStart =  i + 1;
+              state = OUTSIDE;
+
             }else{
                 //溜まったテキストが空
                     buffer = body.slice(open, i + 1);
