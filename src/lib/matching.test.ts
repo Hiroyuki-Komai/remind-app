@@ -1,7 +1,11 @@
 import { describe, it, expect } from "vitest";
+import type { BlankToken } from "./parser";
 import { normalizeAnswerKey,matchBlanks } from "./matching";
 
 
+function blank(answer: string, index: number): BlankToken {
+  return { kind: "blank", raw: `〈${answer}〉`, answer, index };
+}
 
 
 describe("normalize", () => {
@@ -19,8 +23,8 @@ describe("matchBlanks", () => {
     ]
 
         const newTokens = [
-      { index: 0, answer: "金属" },
-      { index: 1, answer: "非金属" },
+      blank("金属", 0),
+      blank("非金属", 1),
     ]
     const result = matchBlanks(oldBlanks, newTokens);
     expect(result.matched[0].oldBlank.id).toBe("b1");
@@ -34,7 +38,7 @@ describe("matchBlanks", () => {
 
     it("pass1 test不一致検証", () => { 
     const oldBlanks = [{ id: "b1", ordinal: 0, answerKey: "金属" }];
-    const newTokens = [{ index: 0, answer: "非金属" }];
+    const newTokens = [blank("非金属", 0)];
     const result = matchBlanks(oldBlanks, newTokens);
     expect(result.matched.length).toBe(0);
     expect(result.unmatchedNew.length).toBe(1);
@@ -43,7 +47,7 @@ describe("matchBlanks", () => {
 
     it("pass1 test正規化検証", () => { 
     const oldBlanks = [{ id: "b1", ordinal: 0, answerKey: "金 属" }];
-    const newTokens = [{ index: 0, answer: " 金　属 " }];
+    const newTokens = [blank(" 金　属 ", 0)];
     const result = matchBlanks(oldBlanks, newTokens);
     expect(result.matched.length).toBe(1);
     });
@@ -51,8 +55,8 @@ describe("matchBlanks", () => {
     it("pass1 test 新トークンが１つ余る場合", () => { 
     const oldBlanks = [{ id: "b1", ordinal: 0, answerKey: "金属" }];
     const newTokens = [
-      { index: 0, answer: "金属" },
-      { index: 1, answer: "非金属" },
+      blank("金属", 0),
+      blank("非金属", 1),
     ];
     const result = matchBlanks(oldBlanks, newTokens);
     expect(result.matched.length).toBe(1);
@@ -65,7 +69,7 @@ describe("matchBlanks", () => {
       { id: "b1", ordinal: 0, answerKey: "金属" },
       { id: "b2", ordinal: null, answerKey: "非金属" },
     ];
-    const newTokens = [{ index: 0, answer: "金属" }];
+    const newTokens = [blank("金属", 0)];
     const result = matchBlanks(oldBlanks, newTokens);
     expect(result.matched.length).toBe(1);
     expect(result.unmatchedOld.length).toBe(1);//ordinal=nullの旧データはループfor(const token of newTokens){}に入らない
@@ -74,8 +78,8 @@ describe("matchBlanks", () => {
 it("pass2 test 前に穴が1つ挿入されて番号が後ろにずれた場合", () => { 
     const oldBlanks = [{ id: "b1", ordinal: 0, answerKey: "金属" }];
     const newTokens = [
-      { index: 0, answer: "非金属" },
-      { index: 1, answer: "金属" },//前に穴が1つ挿入されて番号が後ろにずれた
+      blank("非金属", 0),
+      blank("金属", 1),//前に穴が1つ挿入されて番号が後ろにずれた
     ];
     const result = matchBlanks(oldBlanks, newTokens);
     expect(result.matched.length).toBe(1);
@@ -89,7 +93,7 @@ it("pass2 test 距離が同じ場合", () => {
       { id: "b1", ordinal: 0, answerKey: "微分" },
       { id: "b2", ordinal: 2, answerKey: "微分" },
     ];
-    const newTokens = [{ index: 1, answer: "微分" }];
+    const newTokens = [blank("微分", 1)];
     const result = matchBlanks(oldBlanks, newTokens);
     expect(result.matched[0].oldBlank.id).toBe("b1");
     })
@@ -100,7 +104,7 @@ it("pass2 test 距離が同じ場合", () => {
 
     it("pass2 test :answerKey が一致する oldデータ が1つもない場合", () => { 
       const oldBlanks = [{ id: "b1", ordinal: 0, answerKey: "金属" }];
-      const newTokens = [{ index: 1, answer: "積分" }];
+      const newTokens = [blank("積分", 1)];
       const result = matchBlanks(oldBlanks, newTokens);
       expect(result.matched.length).toBe(0);
       expect(result.unmatchedOld.length).toBe(1);

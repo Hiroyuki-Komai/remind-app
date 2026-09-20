@@ -1,3 +1,5 @@
+import type { BlankToken } from "./parser";
+
 type BlankLike = {
   id: string;
   ordinal: number | null;
@@ -77,14 +79,17 @@ filter(関数) — oldBlanks の要素を1つずつその関数に渡し、true 
 for(const n of unmatchedNew){
     const normedAnswerKey = normalizeAnswerKey(n.answer);//新データの答えを正規化
     let best: BlankLike | null = null;//一時旧ordinalの最小値を保持する変数
+    let bestDist = Infinity;
+    let bestOrdinal = Infinity;
     for(const o of unmatchedOld){
         if(matchedOldIds.has(o.id) || normedAnswerKey !== o.answerKey || o.ordinal === null){
             continue;
         }
         const dist = Math.abs(o.ordinal - n.index);
-        const bestDist = best === null ? null : Math.abs(best.ordinal - n.index);
-        if(best === null || dist < bestDist || ((dist === bestDist) && o.ordinal < best.ordinal)){
+        if (dist < bestDist || (dist === bestDist && o.ordinal < bestOrdinal)) {
             best = o;
+            bestDist = dist;
+            bestOrdinal = o.ordinal;
         }
     }
     if (best !== null) {
