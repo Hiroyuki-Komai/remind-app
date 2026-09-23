@@ -51,3 +51,35 @@ export async function updateCard(cardId: string, body: string) {
     });
   });
 }
+
+export async function createCard(body: string) {
+
+  // TODO 1. パース → blank トークンだけ取り出す（updateCard の段階1と同じ）
+    const newTokens = parse(body).filter((t): t is BlankToken => t.kind === "blank");
+
+    // TODO 2. sortKey を決める（既存の最大値 + 1000）
+      await prisma.$transaction(async (tx) => {
+        const agg = await tx.card.aggregate({
+           _max: { sortKey: true } 
+        });// agg の型: { _max: { sortKey: number | null } } ※見つからなかったときにnullを返す
+      const sortKey = (agg._max.sortKey ?? 0) + 1000;
+
+        // TODO 3. カードと穴をまとめて作成
+        await tx.card.create({
+          data: {
+            body: body,
+            sortKey: sortKey,
+            blanks: {
+              create: newTokens.map((t) => ({
+                //ここに穴一個分のデータ
+                ordinal: t.index, 
+                answerKey: normalizeAnswerKey(t.answer),
+              })),
+            },
+          },
+        });
+      
+      });
+
+
+    }
