@@ -23,7 +23,20 @@ export type BlankStats = {
     max: number;
   };
 };
-export function toFront(tokens: Token[], stats: BlankStats[]): FrontToken[];
+
+export type FrontBlank = {
+  kind: "blank";
+  index: number;
+  blankId: string;
+  missCount: { 
+    current: number; 
+    max: number 
+  };
+};
+export type FrontToken = TextToken | FrontBlank;
+//BlankToken との違いは「answer を持たず、
+// blankId と missCount を持つ」こと
+//export function toFront(tokens: Token[], stats: BlankStats[]): FrontToken[];
 //************************************************
 
 export function parse(body: string): Token[] {
@@ -208,7 +221,7 @@ export function toFront(tokens: Token[], stats: BlankStats[]): FrontToken[] {
       kind: "blank",
       index: t.index,
       blankId: stat.id,
-      missCount: stat.misscount,
+      missCount: stat.missCount,
     };
 
     //⦿tokens（parse()の出力）の時点で、
