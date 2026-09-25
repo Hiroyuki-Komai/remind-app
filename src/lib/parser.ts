@@ -39,6 +39,12 @@ export type FrontToken = TextToken | FrontBlank;
 //export function toFront(tokens: Token[], stats: BlankStats[]): FrontToken[];
 //************************************************
 
+  //（parser仕様書2.1）保存前に正規化
+export function normalizeBody(body: string):string {
+    const normalized = body.normalize("NFC").replaceAll("⟨","〈").replaceAll("⟩","〉").replace(/\r\n/g, "\n")
+    return normalized; //⟨→〈、⟩→〉
+}
+
 export function parse(body: string): Token[] {
   const tokens: Token[] = [];
 
