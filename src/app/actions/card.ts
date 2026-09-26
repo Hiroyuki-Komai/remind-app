@@ -88,3 +88,29 @@ export async function createCard(body: string) {
 
 
     }
+
+    export async function revealBlank(blankId: string): Promise<string> {
+  // 1. Blank を id で1件取得
+  const blank = await prisma.blank.findUnique({
+    where: { id: blankId } 
+  })
+  // 2. 見つからない／削除済み（deletedAt が null でない）／ordinal が null なら throw
+  if (blank === null || blank.deletedAt !== null || blank.ordinal === null){
+  throw new Error("Blankが見つかりません")
+  }
+  // 3. その Blank の cardId で Card を1件取得（無ければ throw）
+  const card = await prisma.card.findUnique({
+    where: { id: blank.cardId } 
+  })
+
+   if (card === null){
+    throw new Error("Cardが見つかりません")
+  }
+  // 4. parse(card.body) から、kind が "blank" かつ index が Blank の ordinal と一致するトークンを探す
+  const pinpointedToken = parse(card.body).find((t): t is BlankToken => t.kind === "blank" && t.index === blank.ordinal);
+  // 5. 見つかったトークンの answer を返す（無ければ throw）
+  if(!pinpointedToken){
+        throw new Error("対応トークンが見つかりません")
+  }
+  return pinpointedToken.answer;
+}
