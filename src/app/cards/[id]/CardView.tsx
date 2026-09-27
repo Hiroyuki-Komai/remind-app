@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { FrontToken } from "@/lib/parser";
-import { revealBlank } from "@/app/actions/card";
+import { revealBlank, recordAnswer } from "@/app/actions/card";
 
 export default function CardView({ tokens }: { tokens: FrontToken[] }) {
   // 開いた穴の答え。例：{ "cmufe8tss...": "東京" }
@@ -18,6 +18,21 @@ export default function CardView({ tokens }: { tokens: FrontToken[] }) {
     // TODO 3. revealed に追加
     setRevealed((prev) => ({ ...prev, [blankId]: answer }));
   };
+
+
+  const [answered, setAnswered] = useState<Record<string, boolean>>({});
+
+  const handleAnswer = async (blankId: string, isCorrect: boolean) => {
+  // TODO1: すでに answered[blankId] が記録済みなら何もしない（return）
+  if(answered[blankId] !== undefined){
+    return ;//何も返さずに終了
+  }
+  // TODO2: recordAnswer(blankId, isCorrect) を呼ぶ（await）
+  await recordAnswer(blankId, isCorrect);
+  // TODO3: setAnswered で answered[blankId] に isCorrect を保存する
+  setAnswered((prev) => ({ ...prev, [blankId]: isCorrect }));
+};
+
 
   return (
     <p className="whitespace-pre-wrap leading-loose">
@@ -42,6 +57,17 @@ export default function CardView({ tokens }: { tokens: FrontToken[] }) {
                 {t.missCount.current}({t.missCount.max})
               </sup>
             )}
+          {answer !== undefined && answered[t.blankId] === undefined && (
+            <span className="ml-1 space-x-1">
+            <button type="button" onClick={() => handleAnswer(t.blankId, true)} className="text-green-500">○</button>
+            <button type="button" onClick={() => handleAnswer(t.blankId, false)} className="text-red-500">×</button>
+            </span>
+          )}
+        {answered[t.blankId] !== undefined && (
+          <span className="ml-1 text-xs text-gray-400">
+          {answered[t.blankId] ? "○" : "×"} 記録済み
+          </span>
+        )}
           </span>
         );
       })}
