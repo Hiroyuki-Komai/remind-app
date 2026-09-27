@@ -89,6 +89,8 @@ export async function createCard(body: string) {
 
     }
 
+
+
     export async function revealBlank(blankId: string): Promise<string> {
   // 1. Blank を id で1件取得
   const blank = await prisma.blank.findUnique({
@@ -113,4 +115,26 @@ export async function createCard(body: string) {
         throw new Error("対応トークンが見つかりません")
   }
   return pinpointedToken.answer;
+}
+
+
+export async function recordAnswer(blankId: string, isCorrect: boolean): Promise<void> {
+  // 1. Blank を id で1件取得
+  const blank = await prisma.blank.findUnique({
+    where: { id: blankId } 
+  })
+  // 2. 見つからない／削除済みなら throw
+  if (blank === null || blank.deletedAt !== null ){
+  throw new Error("Blankが見つかりません")
+  }
+  //手順1・2で取った blank は、ここでは値の取り出しには使わず、
+  // 「存在して、削除されていない穴か」を確かめる門番の役だけ
+
+  // 3. BlankLog に1件追記（blankId と isCorrect）
+  await prisma.blankLog.create({ 
+    data: { 
+      blankId: blankId,
+      isCorrect: isCorrect,
+    } 
+  })
 }
