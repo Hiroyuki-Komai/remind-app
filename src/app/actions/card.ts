@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { parse, normalizeBody, type BlankToken } from "@/lib/parser";
 import { matchBlanks,normalizeAnswerKey } from "@/lib/matching";
+import { nextSchedule } from "@/lib/scheduling";
 
 
 export async function updateCard(cardId: string, body: string) {
@@ -137,4 +138,69 @@ export async function recordAnswer(blankId: string, isCorrect: boolean): Promise
       isCorrect: isCorrect,
     } 
   })
+}
+
+
+export async function reviewCard(cardId: string): Promise<void> {
+  // TODO 1. Card を id で1件取得（無ければ throw）
+  const card = await prisma.card.findUnique({
+    where: { id: cardId } 
+  })
+  if (card === null ){
+    throw new Error("Cardが見つかりません")
+  }
+  // TODO 2. since を決める（lastReviewedAt が null なら new Date(0)）
+  const since = card.lastReviewedAt ?? new Date(0);
+  // TODO 3. 生存Blank と since 以降の logs を include で取得
+  const blanks = await prisma.blank.findMany({
+    where: {
+      cardId:cardId,
+      deletedAt: null
+    },
+    include: {
+      logs: {
+        where: {
+          answeredAt: {
+           gt: since,
+          },     
+        }
+      }
+    }
+  });
+  // TODO 4. logs が空の Blank が1つでもあれば throw（未回答）
+  if(blanks.some(b => b.logs.length === 0)){
+    throw new Error("未回答の項目があります。");
+  }
+// TODO 5. isCorrect === false の log が1件でもあれば true、なければ false となる変数を設定
+  const hasErrorBlank = blanks.some(b => b.logs.some(l => l.isCorrect === false));
+
+  // intervalStep / dueDate / masteredAt の更新と ReviewLog の追記
+  // TODO 6. 「今」を決める
+  const now = new Date();
+  // TODO 7. nextSchedule(intervalStep: number , hasErrorBlank: boolean  , now: Date) を呼んで next に受ける
+  const next = nextSchedule(card.intervalStep,hasErrorBlank,now);
+  // TODO 8. prisma.$transaction(async (tx) => { ... }) の中で2つ書く
+  await prisma.$transaction(async (tx) => {
+    await tx.card.update({
+      data: { 
+        intervalStep: next.intervalStep,
+        dueDate: next.dueDate,
+        masteredAt: next.masteredAt, 
+        lastReviewedAt: now 
+      },
+      where: {
+        id: cardId
+      }
+    });
+    await tx.reviewLog.create({
+      data: { 
+        cardId: cardId,
+        isCorrect: !hasErrorBlank,
+        intervalStepAfter: next.intervalStep,
+        dueDateAfter: next.dueDate
+       }
+    });
+  })  
+  //   (a) tx.card.update：data に ...next と lastReviewedAt: now
+  //   (b) tx.reviewLog.create：cardId / isCorrect / intervalStepAfter / dueDateAfter
 }
