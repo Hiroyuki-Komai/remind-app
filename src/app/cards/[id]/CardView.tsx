@@ -38,6 +38,12 @@ export default function CardView({ tokens, cardId }: { tokens: FrontToken[]; car
    await reviewCard(cardId);
   };
 
+//「復習完了」ボタンを、全穴に回答済みになるまで押せなくする ための変数：
+//tokensからBlankだけを取り出す
+  const blankCount = tokens.filter((t) => t.kind === "blank").length;
+//objであるansweredのプロパティblankIdの総数と穴の数　が一致＝全問回答済み
+  const allAnswered = blankCount === Object.keys(answered).length;
+
 
 
   return (
@@ -79,7 +85,7 @@ export default function CardView({ tokens, cardId }: { tokens: FrontToken[]; car
         );
       })}
     </p>
-        <button type="button" onClick={handleReview} className="mt-4 rounded bg-blue-600 px-4 py-2 text-white">復習完了</button>
+        <button type="button" onClick={handleReview} className="mt-4 rounded bg-blue-600 px-4 py-2 text-white" disabled={!allAnswered}>復習完了</button>
       </div>
   );
 }
