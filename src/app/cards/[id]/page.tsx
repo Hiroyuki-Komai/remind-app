@@ -44,7 +44,7 @@ export default async function CardPage({
 
   return (
     <main className="mx-auto max-w-2xl p-6">
-      <CardView tokens={ front } />
+      <CardView tokens={ front } cardId={card.id} />
     </main>
   );
 }

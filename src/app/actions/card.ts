@@ -179,7 +179,7 @@ export async function reviewCard(cardId: string): Promise<void> {
   const now = new Date();
   // TODO 7. nextSchedule(intervalStep: number , hasErrorBlank: boolean  , now: Date) を呼んで next に受ける
   const next = nextSchedule(card.intervalStep,hasErrorBlank,now);
-  // TODO 8. prisma.$transaction(async (tx) => { ... }) の中で2つ書く
+  // TODO 8. Cardの更新とReviewLogの追記を1つのトランザクションで行う：
   await prisma.$transaction(async (tx) => {
     await tx.card.update({
       data: { 

@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import type { FrontToken } from "@/lib/parser";
-import { revealBlank, recordAnswer } from "@/app/actions/card";
+import { revealBlank, recordAnswer, reviewCard } from "@/app/actions/card"; // reviewCard を足す
 
-export default function CardView({ tokens }: { tokens: FrontToken[] }) {
+
+export default function CardView({ tokens, cardId }: { tokens: FrontToken[]; cardId: string }) {
   // 開いた穴の答え。例：{ "cmufe8tss...": "東京" }
   const [revealed, setRevealed] = useState<Record<string, string>>({});
 
@@ -31,10 +32,16 @@ export default function CardView({ tokens }: { tokens: FrontToken[] }) {
   await recordAnswer(blankId, isCorrect);
   // TODO3: setAnswered で answered[blankId] に isCorrect を保存する
   setAnswered((prev) => ({ ...prev, [blankId]: isCorrect }));
-};
+  };
+
+  const handleReview = async () => {
+   await reviewCard(cardId);
+  };
+
 
 
   return (
+      <div>
     <p className="whitespace-pre-wrap leading-loose">
       {tokens.map((t, i) => {
         if (t.kind === "text") return <span key={i}>{t.value}</span>;
@@ -72,5 +79,7 @@ export default function CardView({ tokens }: { tokens: FrontToken[] }) {
         );
       })}
     </p>
+        <button type="button" onClick={handleReview} className="mt-4 rounded bg-blue-600 px-4 py-2 text-white">復習完了</button>
+      </div>
   );
 }
