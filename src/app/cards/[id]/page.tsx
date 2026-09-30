@@ -18,11 +18,25 @@ export default async function CardPage({
     notFound();
   }
 
-  // 段1-b: このカードの生存中の Blank を取得
+  // 段1-b: このカードの生存中の Blankを取得
+  //一度も×がない穴もaliveBlanksにちゃんと入っていて、
+  //その場合、b.logs.filter(...).lengthは0になる。
   const aliveBlanks = await prisma.blank.findMany(
     {
-      where: {cardId: id, 
-      deletedAt: null}
+      where: {
+        cardId: id, 
+        deletedAt: null
+      },
+      include: {
+        logs: {
+          where: {
+            isCorrect: false
+          }
+        }
+      }
+      //includeの中のwhereは、ぶら下げるログを絞るだけで、
+      //生存中のBlank自体を減らさないため、
+      //include節を追加しても挙動はバグらない
     }
   );
 
@@ -32,7 +46,8 @@ export default async function CardPage({
     id: b.id,
     ordinal: b.ordinal!, //非 null アサーション演算子というらしい
     missCount: {
-      current: 0,
+      //復習期限リセット後に誤答した回数がcurrent
+      current: b.logs.filter((l) => l.answeredAt >= b.resetAt).length,
       max: b.maxMissCount
     }, 
   }));

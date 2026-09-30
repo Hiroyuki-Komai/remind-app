@@ -120,24 +120,52 @@ export async function createCard(body: string) {
 
 
 export async function recordAnswer(blankId: string, isCorrect: boolean): Promise<void> {
-  // 1. Blank を id で1件取得
+  // 1-1. Blank を id で1件取得
   const blank = await prisma.blank.findUnique({
     where: { id: blankId } 
   })
-  // 2. 見つからない／削除済みなら throw
+  // 1-2. 見つからない／削除済みなら throw
   if (blank === null || blank.deletedAt !== null ){
   throw new Error("Blankが見つかりません")
   }
   //手順1・2で取った blank は、ここでは値の取り出しには使わず、
   // 「存在して、削除されていない穴か」を確かめる門番の役だけ
 
-  // 3. BlankLog に1件追記（blankId と isCorrect）
-  await prisma.blankLog.create({ 
-    data: { 
-      blankId: blankId,
-      isCorrect: isCorrect,
-    } 
-  })
+  // TODO A. $transaction を開く
+  await prisma.$transaction(async (tx) => {
+  // TODO B. BlankLog に1件追記(blankId と isCorrect）
+    await tx.blankLog.create({ 
+      data: { 
+        blankId: blankId,
+        isCorrect: isCorrect,
+      } 
+    });
+  // TODO C. isCorrect が true ならここで終わり（正解では max は増えない）
+    if(isCorrect){
+      return;
+    }
+  // TODO D. resetAt 以降の × を tx.blankLog.count で数える（= 記録後の current）
+    const currentMissCount = await tx.blankLog.count({ 
+      where: {
+        blankId: blankId,
+        answeredAt: {
+          gte: blank.resetAt
+        },
+        isCorrect: false
+      }
+    });
+  // TODO E. D が blank.maxMissCount より大きければ、tx.blank.update で maxMissCount を更新  
+    if(currentMissCount > blank.maxMissCount){
+      await tx.blank.update({
+        data:{
+          maxMissCount: currentMissCount
+        },
+        where: {
+          id: blankId
+        }
+      });
+    }
+  });
 }
 
 
