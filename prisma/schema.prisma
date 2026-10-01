@@ -21,6 +21,10 @@ model Card {
 
   sortKey Int @unique
 
+  nextCardId String? @unique
+  nextCard   Card?   @relation("CardChain", fields: [nextCardId], references: [id], onDelete: SetNull)
+  prevCard   Card?   @relation("CardChain")
+
   // --- 固定間隔スケジューリングの現在状態（ADR-013） -------------------------
   intervalStep Int      @default(0) // 固定間隔テーブルの添字（0〜5。5は定着判定のみ）
   dueDate      DateTime @default(now()) // 次回復習日。新規カードは即出題対象
