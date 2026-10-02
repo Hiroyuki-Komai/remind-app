@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation"; 
 import { useState } from "react";
 import type { FrontToken } from "@/lib/parser";
 import { revealBlank, recordAnswer, reviewCard } from "@/app/actions/card"; // reviewCard を足す
@@ -34,8 +35,12 @@ export default function CardView({ tokens, cardId }: { tokens: FrontToken[]; car
   setAnswered((prev) => ({ ...prev, [blankId]: isCorrect }));
   };
 
+  // TODO A-1. router を作る
+  const router = useRouter();
   const handleReview = async () => {
    await reviewCard(cardId);
+   // TODO A-2. /review へ自動でページ遷移
+   router.push("/review");
   };
 
 //「復習完了」ボタンを、全穴に回答済みになるまで押せなくする ための変数：

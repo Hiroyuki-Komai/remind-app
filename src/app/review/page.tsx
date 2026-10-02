@@ -20,6 +20,9 @@ export default async function ReviewCardListPage() {
   // 1枚ずつリンクにして並べる
   return (
     <main className="mx-auto max-w-2xl p-6">
+        {cards.length === 0 && (
+            <p>今日の復習は完了しました</p>
+        )}
         {cards.map((c) => {
             const front = parse(c.body).map((f) => f.kind === "text" ? f.value : "＿＿").join("")
            return(
