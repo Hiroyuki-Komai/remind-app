@@ -5,6 +5,21 @@ import { parse, normalizeBody, type BlankToken } from "@/lib/parser";
 import { matchBlanks,normalizeAnswerKey } from "@/lib/matching";
 import { nextSchedule } from "@/lib/scheduling";
 
+export async function setNextCard(cardId: string, nextCardId: string | null): Promise<void> {
+  // TODO 1. 自分自身を次にしようとしていたら throw
+  if(cardId === nextCardId){
+    throw new Error("そのカード遷移はできません")
+  }
+  // TODO 2. card.update で nextCardId を書き込む（null なら紐づけ解除）
+  await prisma.card.update({
+      data: { 
+        nextCardId: nextCardId
+      },
+      where: {
+        id: cardId
+      }
+    });
+}
 
 export async function updateCard(cardId: string, body: string) {
 

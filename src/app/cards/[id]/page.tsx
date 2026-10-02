@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { parse, toFront, type BlankStats } from "@/lib/parser";
 import CardView from "./CardView";
+import NextCardSelect from "./NextCardSelect";
 import Link from "next/link"; // 先頭に追加
 
 
@@ -19,6 +20,24 @@ export default async function CardPage({
   if(card === null){
     notFound();
   }
+
+  //B-1カード一覧取得し、自分自身を除く
+  const otherCards = await prisma.card.findMany({
+    orderBy: {
+        sortKey: "asc"
+    },
+    where:{
+      id: { //Cardのid列
+        not: id //URLから取った、このページのカードのid
+      }
+    }
+  });
+  //B-2 labelを作る
+  const candidates = otherCards.map((c) => ({
+    id: c.id,
+    label: parse(c.body).map((f) => f.kind === "text" ? f.value : "＿＿").join("").slice(0, 40)
+  }));
+
   // TODO A-1. 前のカードを取得（nextCardId が id のカード。無ければ null）
   const prevCard = await prisma.card.findUnique({
     where: {
@@ -69,15 +88,16 @@ export default async function CardPage({
     <main className="mx-auto max-w-2xl p-6">
       <CardView tokens={ front } cardId={card.id} />
       <div className="mt-4 flex justify-between">
-      {/* TODO A-2. 前のカードがあれば「← 前へ」のリンク*/}
-      {prevCard && (
-      <Link href={`/cards/${prevCard.id}`}>← 前へ</Link>
-      )}
-      {/*TODO A-3. card.nextCardId があれば「次へ →」のリンク*/} 
-      {card.nextCardId && (
-        <Link href={`/cards/${card.nextCardId}`}>次へ →</Link>
-      )}
+        {/* TODO A-2. 前のカードがあれば「← 前へ」のリンク*/}
+        {prevCard && (
+          <Link href={`/cards/${prevCard.id}`}>← 前へ</Link>
+        )}
+        {/*TODO A-3. card.nextCardId があれば「次へ →」のリンク*/} 
+        {card.nextCardId && (
+          <Link href={`/cards/${card.nextCardId}`}>次へ →</Link>
+        )}
+        <NextCardSelect nextCardId={ card.nextCardId } cardId={card.id} candidates={candidates}/>
       </div>
-      </main>
+    </main>
   );
 }
