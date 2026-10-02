@@ -192,6 +192,12 @@ export async function reviewCard(cardId: string): Promise<void> {
   if (card === null ){
     throw new Error("Cardが見つかりません")
   }
+    // TODO 1'. 「今」を決め,
+    //まだ復習期限が来ていないカードで、復習完了を押せないようにする
+  const now = new Date();
+  if(card.dueDate > now){
+    throw new Error("まだ復習期限ではありません")
+  }
   // TODO 2. since を決める（lastReviewedAt が null なら new Date(0)）
   const since = card.lastReviewedAt ?? new Date(0);
   // TODO 3. 生存Blank と since 以降の logs を include で取得
@@ -218,11 +224,9 @@ export async function reviewCard(cardId: string): Promise<void> {
   const hasErrorBlank = blanks.some(b => b.logs.some(l => l.isCorrect === false));
 
   // intervalStep / dueDate / masteredAt の更新と ReviewLog の追記
-  // TODO 6. 「今」を決める
-  const now = new Date();
-  // TODO 7. nextSchedule(intervalStep: number , hasErrorBlank: boolean  , now: Date) を呼んで next に受ける
+  // TODO 6. nextSchedule(intervalStep: number , hasErrorBlank: boolean  , now: Date) を呼んで next に受ける
   const next = nextSchedule(card.intervalStep,hasErrorBlank,now);
-  // TODO 8. Cardの更新とReviewLogの追記を1つのトランザクションで行う：
+  // TODO 7. Cardの更新とReviewLogの追記を1つのトランザクションで行う：
   await prisma.$transaction(async (tx) => {
     await tx.card.update({
       data: { 
