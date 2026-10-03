@@ -6,7 +6,7 @@ import type { FrontToken } from "@/lib/parser";
 import { revealBlank, recordAnswer, reviewCard } from "@/app/actions/card"; // reviewCard を足す
 
 
-export default function CardView({ tokens, cardId }: { tokens: FrontToken[]; cardId: string }) {
+export default function CardView({ tokens, cardId, isReviewDisabled}: { tokens: FrontToken[]; cardId: string; isReviewDisabled: boolean; }) {
   // 開いた穴の答え。例：{ "cmufe8tss...": "東京" }
   const [revealed, setRevealed] = useState<Record<string, string>>({});
 
@@ -77,8 +77,8 @@ export default function CardView({ tokens, cardId }: { tokens: FrontToken[]; car
             )}
           {answer !== undefined && answered[t.blankId] === undefined && (
             <span className="ml-1 space-x-1">
-            <button type="button" onClick={() => handleAnswer(t.blankId, true)} className="text-green-500">○</button>
-            <button type="button" onClick={() => handleAnswer(t.blankId, false)} className="text-red-500">×</button>
+            <button type="button" onClick={() => handleAnswer(t.blankId, true)} className="rounded border border-green-500 px-2 py-1 hover:bg-green-800 text-white">○</button>
+            <button type="button" onClick={() => handleAnswer(t.blankId, false)} className="rounded border border-red-500 px-2 py-1 hover:bg-red-800 text-white">×</button>
             </span>
           )}
         {answered[t.blankId] !== undefined && (
@@ -90,7 +90,7 @@ export default function CardView({ tokens, cardId }: { tokens: FrontToken[]; car
         );
       })}
     </p>
-        <button type="button" onClick={handleReview} className="mt-4 rounded bg-blue-600 px-4 py-2 text-white" disabled={!allAnswered}>復習完了</button>
+        <button type="button" onClick={handleReview} className="mt-4 rounded bg-blue-600 px-4 py-2 text-white" disabled={!allAnswered || isReviewDisabled}>復習完了</button>{/*「未回答」または「期限前」なら押せない*/}
       </div>
   );
 }

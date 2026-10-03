@@ -20,6 +20,9 @@ export default async function CardPage({
   if(card === null){
     notFound();
   }
+  // card.masteredAt が入っている OR dueDate が未来 なら現時点で復習不可
+  const isMastered = card.masteredAt !== null;
+  const isReviewDisabled = isMastered || card.dueDate > new Date();
 
   //B-1カード一覧取得し、自分自身を除く
   const otherCards = await prisma.card.findMany({
@@ -86,16 +89,30 @@ export default async function CardPage({
 
   return (
     <main className="mx-auto max-w-2xl p-6">
-      <CardView tokens={ front } cardId={card.id} />
+        <h1 className="mb-4 text-xl font-bold">カード詳細</h1>
+      {/*  期限前の場合のみ案内メッセージを表示 */}
+      {isReviewDisabled && (
+        <div className="mb-4 rounded border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800">
+         {isMastered ? (
+           <p>このカードは定着完了です。復習の対象外です。</p>
+          ) : (
+            <p>
+              このカードはまだ復習期限ではありません。閲覧は可能ですが、復習の記録はできません（期限内の復習は
+              <Link href="/review" className="mx-1 font-bold underline">/review</Link>
+              から行ってください）。
+            </p>
+          )}
+        </div>
+      )}
+      <CardView tokens={ front } cardId={card.id} isReviewDisabled={isReviewDisabled}/>
       <div className="mt-4 flex justify-between">
         {/* TODO A-2. 前のカードがあれば「← 前へ」のリンク*/}
         {prevCard && (
-          <Link href={`/cards/${prevCard.id}`}>← 前へ</Link>
+          <Link href={`/cards/${prevCard.id}`} className="rounded border border-gray-500 px-3 py-1 hover:bg-gray-700">← 前へ</Link>
         )}
         {/*TODO A-3. card.nextCardId があれば「次へ →」のリンク*/} 
         {card.nextCardId && (
-          <Link href={`/cards/${card.nextCardId}`}>次へ →</Link>
-        )}
+          <Link href={`/cards/${card.nextCardId}`} className="rounded border border-gray-500 px-3 py-1 hover:bg-gray-700">次へ →</Link>        )}
         <NextCardSelect nextCardId={ card.nextCardId } cardId={card.id} candidates={candidates}/>
       </div>
     </main>

@@ -20,6 +20,7 @@ export default async function ReviewCardListPage() {
   // 1枚ずつリンクにして並べる
   return (
     <main className="mx-auto max-w-2xl p-6">
+          <h1 className="mb-4 text-xl font-bold">今日の復習</h1>
         {cards.length === 0 && (
             <p>今日の復習は完了しました</p>
         )}

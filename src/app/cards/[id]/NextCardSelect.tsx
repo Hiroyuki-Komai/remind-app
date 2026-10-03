@@ -14,8 +14,10 @@ const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
 
 
     return(
-     <select defaultValue ={nextCardId ?? ""} onChange={handleChange}>
-         <option value="">次なし</option>
+     <select defaultValue ={nextCardId ?? ""} onChange={handleChange} 
+     className="rounded border border-gray-500 bg-gray-800 px-2 py-1 [color-scheme:dark]" 
+     >
+         <option value="">次のカード：登録なし</option>
         {candidates.map((c) => (
              <option key={c.id} value={c.id}>{c.label}</option>
         ))}

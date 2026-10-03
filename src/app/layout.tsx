@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,7 +25,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
         suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <nav className="flex gap-2 p-6">
+          <Link href="/review" className="rounded border border-gray-300 px-3 py-1 hover:bg-gray-500">今日の復習</Link>
+          <Link href="/cards" className="rounded border border-gray-300 px-3 py-1 hover:bg-gray-500">全カード一覧</Link>
+          <Link href="/cards/new" className="rounded border border-gray-300 px-3 py-1 hover:bg-gray-500">カード作成</Link>
+        </nav>
+        {children}
+      </body>
     </html>
   );
 }
