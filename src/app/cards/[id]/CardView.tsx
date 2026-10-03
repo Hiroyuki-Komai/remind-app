@@ -90,7 +90,7 @@ export default function CardView({ tokens, cardId, isReviewDisabled}: { tokens: 
         );
       })}
     </p>
-        <button type="button" onClick={handleReview} className="mt-4 rounded bg-blue-600 px-4 py-2 text-white" disabled={!allAnswered || isReviewDisabled}>復習完了</button>{/*「未回答」または「期限前」なら押せない*/}
+        <button type="button" onClick={handleReview} className="mt-4 rounded bg-blue-600 px-4 py-2 text-white disabled:cursor-not-allowed disabled:bg-gray-600 disabled:text-gray-400" disabled={!allAnswered || isReviewDisabled}>復習完了</button>{/*「未回答」または「期限前」なら押せない*/}
       </div>
   );
 }
