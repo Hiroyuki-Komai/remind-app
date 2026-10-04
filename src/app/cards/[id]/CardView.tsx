@@ -71,9 +71,12 @@ export default function CardView({ tokens, cardId, isReviewDisabled}: { tokens: 
               {answer ?? "＿＿"}
             </button>
             {t.missCount.max > 0 && (
-              <sup className="ml-0.5 text-xs text-red-500">
-                {t.missCount.current}({t.missCount.max})
-              </sup>
+            <span
+              title={`これまでに${t.missCount.max}回ミスしました。`}
+              className="ml-1 inline-block cursor-help rounded-full bg-red-900/60 px-2 py-0.5 text-sm text-red-200"
+            >
+            {t.missCount.max}
+            </span>
             )}
           {answer !== undefined && answered[t.blankId] === undefined && (
             <span className="ml-1 space-x-1">
