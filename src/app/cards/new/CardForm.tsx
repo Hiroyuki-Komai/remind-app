@@ -2,12 +2,16 @@
 
 import { useState } from "react";
 import { createCard } from "@/app/actions/card";
+import { useRouter } from "next/navigation"; 
+
 
 export default function CardForm() {
   const [body, setBody] = useState("");
 
+  const router = useRouter();
   const handleSave = async () => {
     await createCard(body);
+    router.push("/cards");
   };
 
   return (
