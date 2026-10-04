@@ -73,7 +73,7 @@ export default function CardView({ tokens, cardId, isReviewDisabled}: { tokens: 
             {t.missCount.max > 0 && (
             <span
               title={`これまでに${t.missCount.max}回ミスしました。`}
-              className="ml-1 inline-block cursor-help rounded-full bg-red-900/60 px-2 py-0.5 text-sm text-red-200"
+              className="ml-1 inline-block rounded-full bg-red-900/60 px-2 py-0.5 text-sm text-red-200"
             >
             {t.missCount.max}
             </span>
