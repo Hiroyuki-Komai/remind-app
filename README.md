@@ -85,6 +85,7 @@ PowerShell や Mac / Linux の場合は、`.env` ファイルを手作りし、`
 ---
 
 ## 使い方
+![デモ](docs/demo.gif)
 
 ### 主な画面 
 | 画面 | URL | 役割 |
