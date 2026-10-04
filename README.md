@@ -61,23 +61,26 @@
 - Docker Desktop
 
 ### 手順
+コマンドプロンプト（cmd）で実行します。
+
 
 ```bash
 git clone https://github.com/Hiroyuki-Komai/remind-app.git
 cd remind-app
 npm install
 
-# .env を作成し、以下を記載
-# DATABASE_URL="postgresql://remind:remind_local_pw@localhost:5432/remind?schema=public"
+echo DATABASE_URL="postgresql://remind:remind_local_pw@localhost:5432/remind?schema=public"> .env
 
 docker compose up -d
 npx prisma migrate dev
 npm run dev
 ```
 
-`http://localhost:3000` を開きます。
+PowerShell や Mac / Linux の場合は、`.env` ファイルを手作りし、`DATABASE_URL="..."` の1行を書いてください。
 
-環境構築で詰まりやすい箇所は [環境構築手順](docs/環境構築手順_v1_1.md) にまとめています。
+`http://localhost:3000` を開くと、自動で今日の復習（`/review`）に移動します。
+
+環境構築で詰まりやすい箇所は [環境構築手順](docs/環境構築手順_v1.2.md) にまとめています。
 
 ---
 
