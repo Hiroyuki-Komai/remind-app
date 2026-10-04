@@ -2,6 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { parse } from "@/lib/parser";
 
+export const dynamic = "force-dynamic";
+
 export default async function CardListPage() {
   // TODO 1. 全カードを sortKey の昇順で取得
     const cards = await prisma.card.findMany({

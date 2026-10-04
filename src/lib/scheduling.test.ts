@@ -1,12 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { nextSchedule } from "./scheduling";
 
-
-function blank(answer: string, index: number): BlankToken {
-  return { kind: "blank", raw: `〈${answer}〉`, answer, index };
-}
-
-
 describe("scheduling", () => {
     const now = new Date("2026-10-01T00:00:00Z");
         it("step0で正解すると、step1・翌日になる", () => {

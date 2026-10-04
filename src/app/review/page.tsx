@@ -2,6 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { parse } from "@/lib/parser";
 
+export const dynamic = "force-dynamic";
+
 //cards/page.tsxの大部分を転用
 
 export default async function ReviewCardListPage() {
