@@ -5,9 +5,9 @@ const INTERVAL_DAYS = [1, 3, 7, 14, 30]; // 添字 = intervalStep
 
 
 export function nextSchedule(intervalStep: number , hasErrorBlank: boolean  , now: Date ): {intervalStep: number, dueDate: Date, masteredAt: Date | null} {
-  // TODO 1. hasErrorBlank なら：step 0、1日後、masteredAt は null
+  // TODO 1. hasErrorBlank なら：step 0、すぐ出題、masteredAt は null
     if(hasErrorBlank){
-        return { intervalStep: 0, dueDate: addDays(now,INTERVAL_DAYS[0]), masteredAt: null };
+        return { intervalStep: 0, dueDate: now, masteredAt: null };
     }
   // TODO 2. intervalStep === 5 なら：定着完了（step 5 のまま、dueDate は now、masteredAt は now）
     if(intervalStep === 5){

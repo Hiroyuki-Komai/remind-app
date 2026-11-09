@@ -12,11 +12,11 @@ describe("scheduling", () => {
         it("step5で正解すると、step5・定着済みになる", () => {
     expect(nextSchedule(5,false,now)).toEqual({intervalStep: 5,dueDate: now, masteredAt: now});
     });
-        it("step5で誤答すると、step0・翌日になる", () => {
-    expect(nextSchedule(5,true,now)).toEqual({intervalStep: 0,dueDate: new Date("2026-10-02T00:00:00Z"), masteredAt: null});
+        it("step5で誤答すると、step0・すぐ出題される", () => {
+    expect(nextSchedule(5,true,now)).toEqual({intervalStep: 0,dueDate: now, masteredAt: null});
     });
-        it("step2で誤答すると、step0・翌日になる", () => {
-    expect(nextSchedule(2,true,now)).toEqual({intervalStep: 0,dueDate: new Date("2026-10-02T00:00:00Z"), masteredAt: null});
+        it("step2で誤答すると、step0・すぐ出題される", () => {
+    expect(nextSchedule(2,true,now)).toEqual({intervalStep: 0,dueDate: now, masteredAt: null});
     });
 });
 
